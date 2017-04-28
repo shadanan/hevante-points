@@ -85,16 +85,70 @@ def get_welcome_response():
         card_title, speech_output, reprompt_text, should_end_session))
 
 def send_hevante_points(intent, session):
-    card_title = intent['name']
-    should_end_session = True
+    session['card_title'] = intent['name']
 
-    print("Intent: %s" % str(intent))
+    session['points'] = intent['slots']['Points'].get('value')
+    session['dest'] = remap_name(intent['slots']['Dest'].get('value')
+    session['src'] = remap_name(intent['slots']['Source'].get('value')
+    session['reason'] = intent['slots']['Reason'].get('value')
 
-    src = remap_name(intent['slots']['Source']['value'])
-    dest = remap_name(intent['slots']['Dest']['value'])
-    points = intent['slots']['Points']['value']
-    reason = intent['slots']['Reason']['value']
+    prompt_for_args(session)
+    
+def get_points(intent, session):
+    session['card_title'] = intent['name']
+    session['points'] = intent['slots']['Points']['value']
 
+    return prompt_for_args(session)
+
+def get_name(intent, session):
+    session['card_title'] = intent['name']
+    
+    if session['prompt'] == 'dest':
+        session['dest'] = remap_name(intent['slots']['Dest']['value'])
+    else:
+        session['src'] = remap_name(intent['slots']['Source']['value'])
+
+    return prompt_for_args(session)
+       
+def get_reason(intent, session):
+    session['card_title'] = intent['name']
+    session['reason'] = intent['slots']['Reason']['value']
+
+    return prompt_for_args(session)
+
+def prompt_for_args(session):
+    print("Session: %s" % session) 
+    should_end_session = False
+    points = session.get('points')
+    dest = session.get('dest')
+    src = session.get('src')
+    reason = session.get('reason')
+
+    if points is None:
+        session['prompt'] = 'points'
+        speech_output = "How many Hevahnty points should I send?"
+    elif dest is None:
+        session['prompt'] = 'dest'
+        speech_output = "Who should I send %s Hevahnty points to?" % points
+    elif src is None:
+        session['prompt'] = 'src'
+        speech_output = "Who am I sending %s Hevahnty points from?" % points
+    elif reason is None:
+        session['prompt'] = 'reason']
+        speech_output = "Why am I sending %s %s points?" % (dest, points)
+    else:
+        should_end_session = True
+        result = do_post(src, dest, points, reason)
+        if result:
+            speech_output = "Okay. Sent %s %s points from %s for %s" % (dest, points, src, reason)
+        else:
+            speech_output = "Sorry, I could not send %s %s points from %s for %s" % (dest, points, src, reason)
+
+    reprompt_text = "Sorry, I didn't catch that." + speech_output
+    return build_response(session, build_speechlet_response(
+        session['card_title'], speech_output, reprompt_text, should_end_session))
+
+def do_post(src, dest, points, reason):
     form_data = {
         'entry.354337782': src,
         'entry.729579027': dest,
@@ -106,13 +160,8 @@ def send_hevante_points(intent, session):
 
     print('Post Data: %s' % str(form_data))
     response = requests.post(DOC_URL, data=form_data)
-    if response.status_code == 200:
-        speech_output = "Okay. Sent %s %s points for %s" % (dest, points, reason)
-    else:
-        speech_output = "Sorry, I could not send %s %s points for %s" % (dest, points, reason)
 
-    return build_response({}, build_speechlet_response(
-        card_title, speech_output, None, should_end_session))
+    return response.status_code == 200
 
 def handle_session_end_request():
     card_title = "Session Ended"
@@ -154,6 +203,12 @@ def on_intent(intent_request, session):
     # Dispatch to your skill's intent handlers
     if intent_name == "SendHevantePoints":
         return send_hevante_points(intent, session)
+    elif intent_name == "GetPoints":
+        return get_points(intent, session)
+    elif intent_name == "GetName":
+        return get_name(intent, session)
+    elif intent_name == "GetReason":
+        return get_reason(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
