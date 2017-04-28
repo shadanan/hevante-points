@@ -72,13 +72,14 @@ def get_welcome_response():
     """
 
     session_attributes = {}
-    card_title = "Welcome"
-    speech_output = "Welcome to the Hevante Points skill. " \
-                    "The help section is currently under construction"
-    # If the user either does not reply to the welcome message or says something
-    # that is not understood, they will be prompted again with this text.
-    reprompt_text = "Maybe you didn't hear me the first time." \
-                    "The help section is currently under construction"
+    card_title = "Welcome to Hevante Points skill."
+    speech_output = (
+        "Welcome to the Hevahnty Points skill. You can say, "
+        "Alexa, ask Hevahnty to send Emily 5 points from Julia for being awesome.")
+    reprompt_text = (
+        "I'm sorry, I didn't understand. You can say, "
+        "Alexa, ask Hevahnty to send Tal 5 points from Shad for helping a lot.")
+
     should_end_session = False
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
@@ -115,8 +116,7 @@ def send_hevante_points(intent, session):
 
 def handle_session_end_request():
     card_title = "Session Ended"
-    speech_output = "Thank you for using the Hevante Point skill." \
-                    "Have a nice day! "
+    speech_output = "Thank you for using the Hevahnty Points skill!"
     # Setting this to true ends the session and exits the skill.
     should_end_session = True
     return build_response({}, build_speechlet_response(
@@ -159,7 +159,7 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     else:
-        raise ValueError("Invalid intent")
+        raise ValueError("Invalid intent: %s" % intent_name)
 
 
 def on_session_ended(session_ended_request, session):
