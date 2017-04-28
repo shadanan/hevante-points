@@ -30,6 +30,8 @@ name_map = {
 }
 
 def remap_name(name):
+    if name is None:
+        return None
     return name_map.get(name.lower(), None)
 
 
@@ -85,56 +87,56 @@ def get_welcome_response():
         card_title, speech_output, reprompt_text, should_end_session))
 
 def send_hevante_points(intent, session):
-    session['card_title'] = intent['name']
+    session_attributes = session.get('attributes')
+    session_attributes['card_title'] = intent['name']
 
-    session['points'] = intent['slots']['Points'].get('value')
-    session['dest'] = remap_name(intent['slots']['Dest'].get('value')
-    session['src'] = remap_name(intent['slots']['Source'].get('value')
-    session['reason'] = intent['slots']['Reason'].get('value')
+    session_attributes['points'] = intent['slots']['Points'].get('value')
+    session_attributes['dest'] = remap_name(intent['slots']['Dest'].get('value'))
+    session_attributes['src'] = remap_name(intent['slots']['Source'].get('value'))
+    session_attributes['reason'] = intent['slots']['Reason'].get('value')
 
-    prompt_for_args(session)
-    
+    return prompt_for_args(session_attributes)
+
 def get_points(intent, session):
-    session['card_title'] = intent['name']
-    session['points'] = intent['slots']['Points']['value']
+    session_attributes = session.get('attributes')
+    session_attributes['card_title'] = intent['name']
+    session_attributes['points'] = intent['slots']['Points']['value']
 
-    return prompt_for_args(session)
+    return prompt_for_args(session_attributes)
 
 def get_name(intent, session):
-    session['card_title'] = intent['name']
-    
-    if session['prompt'] == 'dest':
-        session['dest'] = remap_name(intent['slots']['Dest']['value'])
-    else:
-        session['src'] = remap_name(intent['slots']['Source']['value'])
+    session_attributes = session.get('attributes')
+    session_attributes['card_title'] = intent['name']
+    session_attributes[session_attributes['prompt']] = remap_name(intent['slots']['Name']['value'])
 
-    return prompt_for_args(session)
-       
+    return prompt_for_args(session_attributes)
+
 def get_reason(intent, session):
-    session['card_title'] = intent['name']
-    session['reason'] = intent['slots']['Reason']['value']
+    session_attributes = session.get('attributes')
+    session_attributes['card_title'] = intent['name']
+    session_attributes['reason'] = intent['slots']['Reason']['value']
 
-    return prompt_for_args(session)
+    return prompt_for_args(session_attributes)
 
-def prompt_for_args(session):
-    print("Session: %s" % session) 
+def prompt_for_args(session_attributes):
+    print("Session: %s" % session_attributes)
     should_end_session = False
-    points = session.get('points')
-    dest = session.get('dest')
-    src = session.get('src')
-    reason = session.get('reason')
+    points = session_attributes.get('points')
+    dest = session_attributes.get('dest')
+    src = session_attributes.get('src')
+    reason = session_attributes.get('reason')
 
     if points is None:
-        session['prompt'] = 'points'
+        session_attributes['prompt'] = 'points'
         speech_output = "How many Hevahnty points should I send?"
     elif dest is None:
-        session['prompt'] = 'dest'
+        session_attributes['prompt'] = 'dest'
         speech_output = "Who should I send %s Hevahnty points to?" % points
     elif src is None:
-        session['prompt'] = 'src'
+        session_attributes['prompt'] = 'src'
         speech_output = "Who am I sending %s Hevahnty points from?" % points
     elif reason is None:
-        session['prompt'] = 'reason']
+        session_attributes['prompt'] = 'reason'
         speech_output = "Why am I sending %s %s points?" % (dest, points)
     else:
         should_end_session = True
@@ -145,8 +147,8 @@ def prompt_for_args(session):
             speech_output = "Sorry, I could not send %s %s points from %s for %s" % (dest, points, src, reason)
 
     reprompt_text = "Sorry, I didn't catch that." + speech_output
-    return build_response(session, build_speechlet_response(
-        session['card_title'], speech_output, reprompt_text, should_end_session))
+    return build_response(session_attributes, build_speechlet_response(
+        session_attributes['card_title'], speech_output, reprompt_text, should_end_session))
 
 def do_post(src, dest, points, reason):
     form_data = {
@@ -194,8 +196,7 @@ def on_launch(launch_request, session):
 def on_intent(intent_request, session):
     """ Called when the user specifies an intent for this skill """
 
-    print("on_intent requestId=" + intent_request['requestId'] +
-          ", sessionId=" + session['sessionId'])
+    print("on_intent requestId: %s, Session: %s" % (intent_request['requestId'], session))
 
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
@@ -246,6 +247,7 @@ def lambda_handler(event, context):
     #     raise ValueError("Invalid Application ID")
 
     if event['session']['new']:
+        event['session']['attributes'] = {}
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
 
