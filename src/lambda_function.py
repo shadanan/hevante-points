@@ -65,6 +65,8 @@ def send_hevante_points(intent, session):
     card_title = intent['name']
     should_end_session = False
 
+    print("Intent: %s" % str(intent))
+
     src = intent['slots']['Source']['value']
     dest = intent['slots']['Dest']['value']
     points = intent['slots']['Points']['value']
@@ -84,7 +86,7 @@ def send_hevante_points(intent, session):
         speech_output = "Okay. Sent %s %s points for %s" % (dest, points, reason)
     else:
         speech_output = "Sorry, I could not send %s %s points for %s" % (dest, points, reason)
-    
+
     return build_response({}, build_speechlet_response(
         card_title, speech_output, None, should_end_session))
 
