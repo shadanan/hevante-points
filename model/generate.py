@@ -43,6 +43,15 @@ for utterance in itertools.product(actions, points_dests, srcs, reason_preps, re
 for utterance in itertools.product(actions, points_dests, reason_preps, reasons, srcs):
     utterances.append('SendHevantePoints %s' % ' '.join(utterance))
 
+for utterance in itertools.product(actions, points_dests):
+    utterances.append('SendHevantePoints %s' % ' '.join(utterance))
+
+for utterance in itertools.product(actions, points_dests, reason_preps, reasons):
+    utterances.append('SendHevantePoints %s' % ' '.join(utterance))
+
+for utterance in itertools.product(actions, points_dests, srcs):
+    utterances.append('SendHevantePoints %s' % ' '.join(utterance))
+
 utterances.append('GetName {Name}')
 utterances.append('GetName to {Name}')
 utterances.append('GetName from {Name}')
