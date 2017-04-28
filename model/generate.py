@@ -47,6 +47,9 @@ utterances.append('GetName {Name}')
 utterances.append('GetName to {Name}')
 utterances.append('GetName from {Name}')
 
+utterances.append('GetPoints {Points}')
+utterances.append('GetPoints {Points} points')
+
 for utterance in itertools.product(reason_preps, reasons):
     utterances.append('GetReason %s' % ' '.join(utterance))
 

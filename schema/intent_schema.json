@@ -1,37 +1,38 @@
 {
-  "intents": [
-    {
-      "intent": "SendHevantePoints",
-      "slots": [
-        {
-          "name": "Source",
-          "type": "LIST_OF_NAMES"
-        },
-        {
-          "name": "Dest",
-          "type": "LIST_OF_NAMES"
-        },
-        {
-          "name": "Points",
-          "type": "AMAZON.NUMBER"
-        },
-        {
-          "name": "Reason",
-          "type": "AMAZON.LITERAL"
-        }
-      ]
-    },
-    {
-      "intent": "GetName",
-      "slots": [
-        {
-          "name": "Name",
-          "type": "LIST_OF_NAMES"
-        }
-      ]
-    },
-    {
-      "intent": "AMAZON.HelpIntent"
-    }
-  ]
+    "intents": [{
+        "intent": "SendHevantePoints",
+        "slots": [{
+            "name": "Source",
+            "type": "LIST_OF_NAMES"
+        }, {
+            "name": "Dest",
+            "type": "LIST_OF_NAMES"
+        }, {
+            "name": "Points",
+            "type": "AMAZON.NUMBER"
+        }, {
+            "name": "Reason",
+            "type": "AMAZON.LITERAL"
+        }]
+    }, {
+        "intent": "GetName",
+        "slots": [{
+            "name": "Name",
+            "type": "LIST_OF_NAMES"
+        }]
+    }, {
+        "intent": "GetPoints",
+        "slots": [{
+            "name": "Points",
+            "type": "AMAZON.NUMBER"
+        }]
+    }, {
+        "intent": "GetReason",
+        "slots": [{
+            "name": "Reason",
+            "type": "AMAZON.LITERAL"
+        }]
+    }, {
+        "intent": "AMAZON.HelpIntent"
+    }]
 }
