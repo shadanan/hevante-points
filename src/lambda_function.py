@@ -32,8 +32,15 @@ name_map = {
 def remap_name(name):
     if name is None:
         return None
-    return name_map.get(name.lower(), None)
+    remapped_name = name_map.get(name.lower(), None)
+    print('Remapped %s to %s' % (name, remapped_name))
+    return remapped_name
 
+def remap_points(points):
+    try:
+        return int(points)
+    except:
+        return None
 
 # --------------- Helpers that build all of the responses ----------------------
 
@@ -73,7 +80,13 @@ def get_welcome_response():
     add those here
     """
 
-    session_attributes = {}
+    session_attributes = {
+        'points': None,
+        'dest': None,
+        'src': None,
+        'reason': None
+    }
+
     card_title = "Welcome to Hevante Points skill."
     speech_output = (
         "Welcome to the Hevahnty Points skill. You can say, "
@@ -87,10 +100,10 @@ def get_welcome_response():
         card_title, speech_output, reprompt_text, should_end_session))
 
 def send_hevante_points(intent, session):
-    session_attributes = session.get('attributes')
+    session_attributes = session.get('attributes', {})
     session_attributes['card_title'] = intent['name']
 
-    session_attributes['points'] = intent['slots']['Points'].get('value')
+    session_attributes['points'] = remap_points(intent['slots']['Points'].get('value'))
     session_attributes['dest'] = remap_name(intent['slots']['Dest'].get('value'))
     session_attributes['src'] = remap_name(intent['slots']['Source'].get('value'))
     session_attributes['reason'] = intent['slots']['Reason'].get('value')
@@ -98,21 +111,21 @@ def send_hevante_points(intent, session):
     return prompt_for_args(session_attributes)
 
 def get_points(intent, session):
-    session_attributes = session.get('attributes')
+    session_attributes = session.get('attributes', {})
     session_attributes['card_title'] = intent['name']
-    session_attributes['points'] = intent['slots']['Points']['value']
+    session_attributes['points'] = remap_points(intent['slots']['Points']['value'])
 
     return prompt_for_args(session_attributes)
 
 def get_name(intent, session):
-    session_attributes = session.get('attributes')
+    session_attributes = session.get('attributes', {})
     session_attributes['card_title'] = intent['name']
     session_attributes[session_attributes['prompt']] = remap_name(intent['slots']['Name']['value'])
 
     return prompt_for_args(session_attributes)
 
 def get_reason(intent, session):
-    session_attributes = session.get('attributes')
+    session_attributes = session.get('attributes', {})
     session_attributes['card_title'] = intent['name']
     session_attributes['reason'] = intent['slots']['Reason']['value']
 
@@ -187,6 +200,7 @@ def on_launch(launch_request, session):
     want
     """
 
+    session['attributes'] = {}
     print("on_launch requestId=" + launch_request['requestId'] +
           ", sessionId=" + session['sessionId'])
     # Dispatch to your skill's launch
@@ -247,7 +261,6 @@ def lambda_handler(event, context):
     #     raise ValueError("Invalid Application ID")
 
     if event['session']['new']:
-        event['session']['attributes'] = {}
         on_session_started({'requestId': event['request']['requestId']},
                            event['session'])
 
