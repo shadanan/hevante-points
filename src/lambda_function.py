@@ -11,6 +11,28 @@ import requests
 
 DOC_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfg9heoTc9KDA9mjTZWpuvtRqXSjoK_Q0wSKIkPyAxUvAtLog/formResponse'
 
+
+Tal = 'Tal'
+Shad = 'Shad'
+Rhyan = 'Rhyan'
+Rahul = 'Rahul'
+Julia = 'Julia'
+Emily = 'Emily'
+
+name_map = {
+    'tal': Tal,
+    'tall': Tal,
+    'shad': Shad,
+    'ryan': Rhyan,
+    'rahul': Rahul,
+    'emily': Emily,
+    'julia': Julia
+}
+
+def remap_name(name):
+    return name_map.get(name.lower(), None)
+
+
 # --------------- Helpers that build all of the responses ----------------------
 
 def build_speechlet_response(title, output, reprompt_text, should_end_session):
@@ -63,12 +85,12 @@ def get_welcome_response():
 
 def send_hevante_points(intent, session):
     card_title = intent['name']
-    should_end_session = False
+    should_end_session = True
 
     print("Intent: %s" % str(intent))
 
-    src = intent['slots']['Source']['value']
-    dest = intent['slots']['Dest']['value']
+    src = remap_name(intent['slots']['Source']['value'])
+    dest = remap_name(intent['slots']['Dest']['value'])
     points = intent['slots']['Points']['value']
     reason = intent['slots']['Reason']['value']
 
@@ -81,6 +103,7 @@ def send_hevante_points(intent, session):
         'pageHistory': 0
     }
 
+    print('Post Data: %s' % str(form_data))
     response = requests.post(DOC_URL, data=form_data)
     if response.status_code == 200:
         speech_output = "Okay. Sent %s %s points for %s" % (dest, points, reason)
