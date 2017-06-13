@@ -18,6 +18,9 @@ Rhyan = 'Rhyan'
 Rahul = 'Rahul'
 Julia = 'Julia'
 Emily = 'Emily'
+Mohamad = 'Mohamad'
+Herman = 'Herman'
+Brandon = 'Brandon'
 
 name_map = {
     'tal': Tal,
@@ -26,7 +29,10 @@ name_map = {
     'ryan': Rhyan,
     'rahul': Rahul,
     'emily': Emily,
-    'julia': Julia
+    'julia': Julia,
+    'mohamad': Mohamad,
+    'herman': Herman,
+    'brandon': Brandon
 }
 
 def remap_name(name):
